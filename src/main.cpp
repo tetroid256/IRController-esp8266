@@ -105,6 +105,8 @@ void setup() {
 void loop() {
   // [Add] WiFi 切断時の自動再接続
   static unsigned long lastWifiCheck = 0;
+  static wl_status_t lastWifiStatus = WL_CONNECTED;
+  
   if (millis() - lastWifiCheck > kWifiRetryMs) {
     lastWifiCheck = millis();
     if (WiFi.status() != WL_CONNECTED) {
@@ -132,7 +134,7 @@ void loop() {
   Serial.println(packetBuffer);
 
   // [Fix] JSON パース失敗を明示的にハンドル
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<128> doc;
   DeserializationError err = deserializeJson(doc, packetBuffer);
   if (err) {
     Serial.print(F("[ERR] JSON parse failed: "));
@@ -176,4 +178,12 @@ void loop() {
     Serial.println(F("[INFO] No state change. IR send skipped."));
     sendAck(remoteIP, remotePort, false);
   }
+
+  if (WiFi.status() != WL_CONNECTED) {
+  if (lastWifiStatus == WL_CONNECTED) { // 切れた瞬間だけ処理
+    Serial.println(F("[WARN] WiFi lost. Reconnecting..."));
+    WiFi.reconnect();
+  }
+}
+  lastWifiStatus = WiFi.status();
 }
