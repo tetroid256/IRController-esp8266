@@ -47,7 +47,7 @@ char      packetBuffer[kPacketBufSize];
 // ─── ヘルパー：WiFi接続 ───────────────────────────────────
 static void connectWiFi() {
   Serial.print(F("Connecting to "));
-  Serial.println(FPSTR(ssid));
+  Serial.println(ssid);
 
   WiFi.mode(WIFI_STA);          // [Add] AP モードを無効化してセキュリティ向上
   WiFi.begin(ssid, password);
@@ -89,11 +89,12 @@ static void sendAck(const IPAddress& remoteIP, uint16_t remotePort, bool ok) {
 
 // ─── setup ───────────────────────────────────────────────
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(10);
   Serial.println(F("\n--- Sharp AC Controller Start ---"));
 
   sharpAC.begin();
+  sharpAC.setModel(A907);
   connectWiFi();
 
   udp.begin(kLocalUdpPort);
